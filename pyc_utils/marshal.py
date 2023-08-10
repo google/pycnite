@@ -111,13 +111,11 @@ class CodeTypeBase:
     co_argcount: int
     co_posonlyargcount: int
     co_kwonlyargcount: int
-    co_nlocals: int
     co_stacksize: int
     co_flags: int
     co_code: bytes
     co_consts: List[object]
     co_names: List[str]
-    co_varnames: List[str]
     co_filename: Union[bytes, str]
     co_name: int
     co_firstlineno: int
@@ -130,7 +128,9 @@ class CodeTypeBase:
 class CodeType_3_8(CodeTypeBase):
     """CodeType for python 3.8 - 3.10."""
 
+    co_nlocals: int
     co_lnotab: bytes
+    co_varnames: List[str]
     co_freevars: Tuple[str, ...]
     co_cellvars: Tuple[str, ...]
 
@@ -139,8 +139,11 @@ class CodeType_3_8(CodeTypeBase):
 class CodeType_3_11(CodeTypeBase):
     """CodeType for python 3.11+."""
 
+    co_qualname: str
     co_localsplusnames: Tuple[str, ...]
     co_localspluskinds: Tuple[int, ...]
+    co_linetable: bytes
+    co_exceptiontable: bytes
 
 
 class MarshalReader:
@@ -368,6 +371,8 @@ class MarshalReader:
     def load_code(self):
         if self.python_version < (3, 11):
             return self.load_code_3_8()
+        else:
+            return self.load_code_3_11()
 
     def load_code_3_8(self):
         """Load a Python code object."""
@@ -377,8 +382,6 @@ class MarshalReader:
         nlocals = self._read_long()
         stacksize = self._read_long()
         flags = self._read_long()
-        # The code field is a 'string of raw compiled bytecode'
-        # (https://docs.python.org/3/library/inspect.html#types-and-members).
         code = self.load()
         consts = self.load()
         names = self.load()
@@ -409,6 +412,45 @@ class MarshalReader:
             co_lnotab=lnotab,
             co_freevars=freevars,
             co_cellvars=cellvars,
+            python_version=self.python_version,
+        )
+
+    def load_code_3_11(self):
+        """Load a Python code object."""
+        argcount = self._read_long()
+        posonlyargcount = self._read_long()
+        kwonlyargcount = self._read_long()
+        stacksize = self._read_long()
+        flags = self._read_long()
+        code = self.load()
+        consts = self.load()
+        names = self.load()
+        localsplusnames = self.load()
+        localspluskinds = self.load()
+        filename = self.load()
+        name = self.load()
+        qualname = self.load()
+        firstlineno = self._read_long()
+        linetable = self.load()
+        exceptiontable = self.load()
+
+        return CodeType_3_11(
+            co_argcount=argcount,
+            co_posonlyargcount=posonlyargcount,
+            co_kwonlyargcount=kwonlyargcount,
+            co_stacksize=stacksize,
+            co_flags=flags,
+            co_code=code,
+            co_consts=consts,
+            co_names=names,
+            co_localsplusnames=localsplusnames,
+            co_localspluskinds=localspluskinds,
+            co_filename=filename,
+            co_name=name,
+            co_qualname=qualname,
+            co_firstlineno=firstlineno,
+            co_linetable=linetable,
+            co_exceptiontable=exceptiontable,
             python_version=self.python_version,
         )
 
