@@ -19,8 +19,8 @@ import unittest
 from pyc_utils import marshal
 
 
-class TestMarshalReader(unittest.TestCase):
-    """Tests for marshal reader."""
+class Base(unittest.TestCase):
+    """Base class for marshal reader tests."""
 
     def assertStrictEqual(self, s1, s2):
         self.assertEqual(s1, s2)
@@ -29,6 +29,10 @@ class TestMarshalReader(unittest.TestCase):
     def load(self, s, python_version=None):
         python_version = python_version or (3, 9)
         return marshal.loads(s, python_version)
+
+
+class TestMarshalReader(Base):
+    """Tests for marshal reader."""
 
     def test_load_none(self):
         self.assertIsNone(self.load(b"N"))
@@ -152,6 +156,29 @@ class TestMarshalReader(unittest.TestCase):
 
     def test_truncated_byte(self):
         self.assertRaises(EOFError, lambda: self.load(b"f"))
+
+
+class TestCodeReader(Base):
+    """Tests for marshal code reader."""
+
+    def test_code(self):
+        # Code from marshal.dumps of
+        #   def f():
+        #     x = 10
+        #     def g():
+        #       return x
+        #     return g
+        bytecode = b"\xe3\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x03\x00\x00\x00\x03\x00\x00\x00s\x14\x00\x00\x00d\x01\x89\x00\x87\x00f\x01d\x02d\x03\x84\x08}\x00|\x00S\x00)\x04N\xe9\n\x00\x00\x00c\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x13\x00\x00\x00s\x04\x00\x00\x00\x88\x00S\x00)\x01N\xa9\x00r\x02\x00\x00\x00\xa9\x01\xda\x01xr\x02\x00\x00\x00\xfa\x1e<ipython-input-1-181056189809>\xda\x01g\x03\x00\x00\x00s\x02\x00\x00\x00\x04\x01z\x0cf.<locals>.gr\x02\x00\x00\x00)\x01r\x06\x00\x00\x00r\x02\x00\x00\x00r\x03\x00\x00\x00r\x05\x00\x00\x00\xda\x01f\x01\x00\x00\x00s\x06\x00\x00\x00\x04\x01\x0c\x01\x04\x02"
+        code = marshal.loads(bytecode, (3, 10))
+        self.assertEqual(code.co_argcount, 0)
+        self.assertEqual(code.co_kwonlyargcount, 0)
+        self.assertEqual(code.co_nlocals, 1)
+        self.assertEqual(code.co_stacksize, 3)
+        self.assertEqual(code.co_flags, 3)
+        self.assertEqual(code.co_names, ())
+        self.assertEqual(code.co_varnames, ("g",))
+        self.assertEqual(code.co_freevars, ())
+        self.assertEqual(code.co_cellvars, ("x",))
 
 
 if __name__ == "__main__":

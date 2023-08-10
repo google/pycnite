@@ -366,50 +366,11 @@ class MarshalReader:
         return self.refs[n]
 
     def load_code(self):
-        # Implemented by subclasses since this depends on the python version.
-        return NotImplemented
+        if self.python_version < (3, 11):
+            return self.load_code_3_8()
 
-    # pylint: enable=missing-docstring
-
-    _DISPATCH = {
-        Type.ASCII: load_ascii,
-        Type.ASCII_INTERNED: load_ascii,
-        Type.BINARY_COMPLEX: load_binary_complex,
-        Type.BINARY_FLOAT: load_binary_float,
-        Type.CODE: load_code,
-        Type.COMPLEX: load_complex,
-        Type.DICT: load_dict,
-        Type.ELLIPSIS: load_ellipsis,
-        Type.FALSE: load_false,
-        Type.FLOAT: load_float,
-        Type.FROZENSET: load_frozenset,
-        Type.INT64: load_int64,
-        Type.INT: load_int,
-        Type.INTERNED: load_interned,
-        Type.LIST: load_list,
-        Type.LONG: load_long,
-        Type.NONE: load_none,
-        Type.NULL: load_null,
-        Type.REF: load_ref,
-        Type.SET: load_set,
-        Type.SHORT_ASCII: load_short_ascii,
-        Type.SHORT_ASCII_INTERNED: load_short_ascii,
-        Type.SMALL_TUPLE: load_small_tuple,
-        Type.STOPITER: load_stopiter,
-        Type.STRING: load_string,
-        Type.STRINGREF: load_stringref,
-        Type.TRUE: load_true,
-        Type.TUPLE: load_tuple,
-        Type.UNICODE: load_unicode,
-    }
-
-
-class MarshalReader_3_8(MarshalReader):
-    """Marshal reader for python 3.8 - 3.10."""
-
-    def load_code(self):
+    def load_code_3_8(self):
         """Load a Python code object."""
-        return NotImplemented
         argcount = self._read_long()
         posonlyargcount = self._read_long()
         kwonlyargcount = self._read_long()
@@ -451,9 +412,43 @@ class MarshalReader_3_8(MarshalReader):
             python_version=self.python_version,
         )
 
+    # pylint: enable=missing-docstring
+
+    _DISPATCH = {
+        Type.ASCII: load_ascii,
+        Type.ASCII_INTERNED: load_ascii,
+        Type.BINARY_COMPLEX: load_binary_complex,
+        Type.BINARY_FLOAT: load_binary_float,
+        Type.CODE: load_code,
+        Type.COMPLEX: load_complex,
+        Type.DICT: load_dict,
+        Type.ELLIPSIS: load_ellipsis,
+        Type.FALSE: load_false,
+        Type.FLOAT: load_float,
+        Type.FROZENSET: load_frozenset,
+        Type.INT64: load_int64,
+        Type.INT: load_int,
+        Type.INTERNED: load_interned,
+        Type.LIST: load_list,
+        Type.LONG: load_long,
+        Type.NONE: load_none,
+        Type.NULL: load_null,
+        Type.REF: load_ref,
+        Type.SET: load_set,
+        Type.SHORT_ASCII: load_short_ascii,
+        Type.SHORT_ASCII_INTERNED: load_short_ascii,
+        Type.SMALL_TUPLE: load_small_tuple,
+        Type.STOPITER: load_stopiter,
+        Type.STRING: load_string,
+        Type.STRINGREF: load_stringref,
+        Type.TRUE: load_true,
+        Type.TUPLE: load_tuple,
+        Type.UNICODE: load_unicode,
+    }
+
 
 def loads(s, python_version):
-    um = MarshalReader_3_8(s, python_version)
+    um = MarshalReader(s, python_version)
     result = um.load()
     if not um.eof():
         raise BufferError("trailing bytes in marshal data")
