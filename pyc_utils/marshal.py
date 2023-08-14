@@ -493,5 +493,11 @@ def loads(s, python_version):
     um = MarshalReader(s, python_version)
     result = um.load()
     if not um.eof():
-        raise BufferError("trailing bytes in marshal data")
+        leftover = um.bufstr[um.bufpos :]
+        if len(leftover) > 80:
+            raise BufferError(f"trailing bytes in marshal data ({um.bufpos}...)")
+        else:
+            raise BufferError(
+                f"trailing bytes in marshal data ({um.bufpos}...): {leftover}"
+            )
     return result
