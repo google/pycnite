@@ -30,3 +30,8 @@ def test_pyc(prefix, version):
     v = "".join(map(str, version))
     filename = f"{prefix}.cpython-{v}.pyc"
     return test_file(filename, version)
+
+
+def test_src(prefix):
+    filename = f"{prefix}.py"
+    return os.path.join(DATADIR, "src", filename)
