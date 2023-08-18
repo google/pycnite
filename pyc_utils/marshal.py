@@ -14,16 +14,16 @@
 
 """A pure python version of marshal.loads."""
 
-import dataclasses
 import struct
 import sys
-from typing import List, Tuple, Union
+from typing import Tuple
 
 from . import types
 
 
 class Type:
-    # Adapted from marshal.c
+    """Type enum from marshal.c."""
+
     NULL = ord("0")
     NONE = ord("N")
     FALSE = ord("F")
@@ -57,7 +57,8 @@ class Type:
 
 
 class Flags:
-    # Masks and values used by FORMAT_VALUE opcode.
+    """Masks and values used by FORMAT_VALUE opcode."""
+
     FVC_MASK = 0x3
     FVC_NONE = 0x0
     FVC_STR = 0x1
@@ -354,7 +355,7 @@ class MarshalReader:
         # https://github.com/python/cpython/blob/master/Objects/lnotab_notes.txt:
         # 'an array of unsigned bytes disguised as a Python bytes object'.
         lnotab = self.load()
-        return types.CodeType_3_8(
+        return types.CodeType38(
             co_argcount=argcount,
             co_posonlyargcount=posonlyargcount,
             co_kwonlyargcount=kwonlyargcount,
@@ -393,7 +394,7 @@ class MarshalReader:
         linetable = self.load()
         exceptiontable = self.load()
 
-        return types.CodeType_3_11(
+        return types.CodeType311(
             co_argcount=argcount,
             co_posonlyargcount=posonlyargcount,
             co_kwonlyargcount=kwonlyargcount,

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Line table reader."""
+
 import abc
 import dataclasses
 
@@ -67,7 +69,7 @@ class LineTableReader(abc.ABC):
 class LnotabReader(LineTableReader):
     """Read code.co_lnotab from pre-Python 3.11."""
 
-    def __init__(self, code: types.CodeType_3_8):
+    def __init__(self, code: types.CodeType38):
         super().__init__(code)
         self.linetable = code.co_lnotab
         if self.linetable:
@@ -105,7 +107,7 @@ class LineTableReader38(LnotabReader):
 class LineTableReader310(LnotabReader):
     """Read code.co_lnotab from Python 3.10."""
 
-    def __init__(self, code: types.CodeType_3_8):
+    def __init__(self, code: types.CodeType38):
         super().__init__(code)
         if self.linetable:
             self.lineno += self.line_delta
@@ -143,7 +145,7 @@ class PyCodeLocation:
 class LineTableReader311(LineTableReader):
     """Read code.co_linetable for Python 3.11+"""
 
-    def __init__(self, code: types.CodeType_3_11):
+    def __init__(self, code: types.CodeType311):
         super().__init__(code)
         self.linetable = code.co_linetable
         self.start = code.co_firstlineno
@@ -227,11 +229,11 @@ class LineTableReader311(LineTableReader):
 
 def linetable_reader(code: types.CodeTypeBase) -> LineTableReader:
     if code.python_version < (3, 10):
-        assert isinstance(code, types.CodeType_3_8)
+        assert isinstance(code, types.CodeType38)
         return LineTableReader38(code)
     elif code.python_version == (3, 10):
-        assert isinstance(code, types.CodeType_3_8)
+        assert isinstance(code, types.CodeType38)
         return LineTableReader310(code)
     else:
-        assert isinstance(code, types.CodeType_3_11)
+        assert isinstance(code, types.CodeType311)
         return LineTableReader311(code)

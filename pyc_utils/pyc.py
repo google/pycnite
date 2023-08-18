@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Load and parse .pyc files."""
+
 import io
 
 from typing import IO

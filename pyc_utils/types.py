@@ -41,7 +41,7 @@ class CodeTypeBase:
 
 
 @dataclass(kw_only=True)
-class CodeType_3_8(CodeTypeBase):
+class CodeType38(CodeTypeBase):
     """CodeType for python 3.8 - 3.10."""
 
     co_nlocals: int
@@ -52,7 +52,7 @@ class CodeType_3_8(CodeTypeBase):
 
 
 @dataclass(kw_only=True)
-class CodeType_3_11(CodeTypeBase):
+class CodeType311(CodeTypeBase):
     """CodeType for python 3.11+."""
 
     co_qualname: str
