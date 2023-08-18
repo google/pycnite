@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""A pure python version of types.CodeType and marshal.loads."""
+"""A pure python version of marshal.loads."""
 
 import dataclasses
 import struct
 import sys
 from typing import List, Tuple, Union
+
+from . import types
 
 
 class Type:
@@ -103,53 +105,10 @@ class Flags:
 NULL = object()  # sentinel marker
 
 
-@dataclasses.dataclass(kw_only=True)
-class CodeTypeBase:
-    """Pure python types.CodeType with python version added."""
-
-    python_version: int
-    co_argcount: int
-    co_posonlyargcount: int
-    co_kwonlyargcount: int
-    co_stacksize: int
-    co_flags: int
-    co_code: bytes
-    co_consts: List[object]
-    co_names: List[str]
-    co_filename: Union[bytes, str]
-    co_name: int
-    co_firstlineno: int
-
-    def __repr__(self):
-        return f"<code: {self.co_name}>"
-
-
-@dataclasses.dataclass(kw_only=True)
-class CodeType_3_8(CodeTypeBase):
-    """CodeType for python 3.8 - 3.10."""
-
-    co_nlocals: int
-    co_lnotab: bytes
-    co_varnames: List[str]
-    co_freevars: Tuple[str, ...]
-    co_cellvars: Tuple[str, ...]
-
-
-@dataclasses.dataclass(kw_only=True)
-class CodeType_3_11(CodeTypeBase):
-    """CodeType for python 3.11+."""
-
-    co_qualname: str
-    co_localsplusnames: Tuple[str, ...]
-    co_localspluskinds: Tuple[int, ...]
-    co_linetable: bytes
-    co_exceptiontable: bytes
-
-
 class MarshalReader:
     """Stateful loader for marshalled files."""
 
-    def __init__(self, data, python_version):
+    def __init__(self, data: bytes, python_version: Tuple[int, int]):
         self.bufstr = data
         self.bufpos = 0
         self.python_version = python_version
@@ -395,7 +354,7 @@ class MarshalReader:
         # https://github.com/python/cpython/blob/master/Objects/lnotab_notes.txt:
         # 'an array of unsigned bytes disguised as a Python bytes object'.
         lnotab = self.load()
-        return CodeType_3_8(
+        return types.CodeType_3_8(
             co_argcount=argcount,
             co_posonlyargcount=posonlyargcount,
             co_kwonlyargcount=kwonlyargcount,
@@ -434,7 +393,7 @@ class MarshalReader:
         linetable = self.load()
         exceptiontable = self.load()
 
-        return CodeType_3_11(
+        return types.CodeType_3_11(
             co_argcount=argcount,
             co_posonlyargcount=posonlyargcount,
             co_kwonlyargcount=kwonlyargcount,
@@ -489,8 +448,8 @@ class MarshalReader:
     }
 
 
-def loads(s, python_version):
-    um = MarshalReader(s, python_version)
+def loads(data: bytes, python_version: Tuple[int, int]):
+    um = MarshalReader(data, python_version)
     result = um.load()
     if not um.eof():
         leftover = um.bufstr[um.bufpos :]

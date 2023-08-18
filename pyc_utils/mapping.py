@@ -14,14 +14,19 @@
 
 """Mapping of opcode codes to names."""
 
+from typing import Dict, Optional, Tuple
 
-def _overlay_mapping(mapping, new_entries):
-    ret = mapping.copy()
+OpMap = Dict[int, str]
+Overlay = Dict[int, Optional[str]]
+
+
+def _overlay_mapping(mapping: OpMap, new_entries: Overlay) -> OpMap:
+    ret: Overlay = mapping.copy()
     ret.update(new_entries)
     return {k: v for k, v in ret.items() if v is not None}
 
 
-PYTHON_3_8_MAPPING = {
+PYTHON_3_8_MAPPING: OpMap = {
     1: "POP_TOP",
     2: "ROT_TWO",
     3: "ROT_THREE",
@@ -145,7 +150,7 @@ PYTHON_3_8_MAPPING = {
     163: "POP_FINALLY",
 }
 
-PYTHON_3_9_MAPPING = _overlay_mapping(
+PYTHON_3_9_MAPPING: OpMap = _overlay_mapping(
     PYTHON_3_8_MAPPING,
     {
         48: "RERAISE",
@@ -171,7 +176,7 @@ PYTHON_3_9_MAPPING = _overlay_mapping(
     },
 )
 
-PYTHON_3_10_MAPPING = _overlay_mapping(
+PYTHON_3_10_MAPPING: OpMap = _overlay_mapping(
     PYTHON_3_9_MAPPING,
     {
         30: "GET_LEN",
@@ -187,7 +192,7 @@ PYTHON_3_10_MAPPING = _overlay_mapping(
     },
 )
 
-PYTHON_3_11_MAPPING = _overlay_mapping(
+PYTHON_3_11_MAPPING: OpMap = _overlay_mapping(
     PYTHON_3_10_MAPPING,
     {
         0: "CACHE",
@@ -266,7 +271,7 @@ PYTHON_3_11_MAPPING = _overlay_mapping(
 )
 
 
-def get_mapping(version):
+def get_mapping(version: Tuple[int, int]) -> OpMap:
     return {
         (3, 8): PYTHON_3_8_MAPPING,
         (3, 9): PYTHON_3_9_MAPPING,

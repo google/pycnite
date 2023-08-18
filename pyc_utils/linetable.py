@@ -17,9 +17,13 @@ import dataclasses
 
 from typing import List, Optional
 
+from . import types
 
-@dataclasses.dataclass
+
+@dataclasses.dataclass(kw_only=True)
 class Entry:
+    """Position information for an opcode."""
+
     index: int
     line: int
     # The following are new in 3.11
@@ -31,13 +35,13 @@ class Entry:
 class LineTableReader(abc.ABC):
     """State machine for decoding a pyc line table."""
 
-    def __init__(self, code):
+    def __init__(self, code: types.CodeTypeBase):
         self.lineno = code.co_firstlineno
         self.pos = 0
 
     @abc.abstractmethod
-    def get(self, i: int) -> int:
-        """Get the line number for the instruction at the given position.
+    def get(self, i: int) -> Entry:
+        """Get position information for the instruction at the given position.
 
         This does NOT allow random access. Call with incremental numbers.
 
@@ -63,7 +67,7 @@ class LineTableReader(abc.ABC):
 class LnotabReader(LineTableReader):
     """Read code.co_lnotab from pre-Python 3.11."""
 
-    def __init__(self, code):
+    def __init__(self, code: types.CodeType_3_8):
         super().__init__(code)
         self.linetable = code.co_lnotab
         if self.linetable:
@@ -85,7 +89,7 @@ class LnotabReader(LineTableReader):
 class LineTableReader38(LnotabReader):
     """Read code.co_lnotab from pre-Python 3.10."""
 
-    def get(self, i: int) -> int:
+    def get(self, i: int) -> Entry:
         while i >= self.next_addr and self.pos < self.end_pos:
             line_diff = self.linetable[self.pos + 1]
             if line_diff >= 0x80:
@@ -95,13 +99,13 @@ class LineTableReader38(LnotabReader):
             self.pos += 2
             if self.pos < self.end_pos:
                 self.next_addr += self.linetable[self.pos]
-        return Entry(i, self.lineno)
+        return Entry(index=i, line=self.lineno)
 
 
 class LineTableReader310(LnotabReader):
     """Read code.co_lnotab from Python 3.10."""
 
-    def __init__(self, code):
+    def __init__(self, code: types.CodeType_3_8):
         super().__init__(code)
         if self.linetable:
             self.lineno += self.line_delta
@@ -115,13 +119,13 @@ class LineTableReader310(LnotabReader):
             line_delta -= 256
         return line_delta
 
-    def get(self, i: int) -> int:
+    def get(self, i: int) -> Entry:
         while i >= self.next_addr and self.pos < self.end_pos:
             self.pos += 2
             if self.pos < self.end_pos:
                 self.next_addr += self.linetable[self.pos]
                 self.lineno += self.line_delta
-        return Entry(i, self.lineno)
+        return Entry(index=i, line=self.lineno)
 
 
 class PyCodeLocation:
@@ -139,7 +143,7 @@ class PyCodeLocation:
 class LineTableReader311(LineTableReader):
     """Read code.co_linetable for Python 3.11+"""
 
-    def __init__(self, code):
+    def __init__(self, code: types.CodeType_3_11):
         super().__init__(code)
         self.linetable = code.co_linetable
         self.start = code.co_firstlineno
@@ -206,9 +210,11 @@ class LineTableReader311(LineTableReader):
             endcol = col + (b2 & 15)
         return (endline, col, endcol)
 
-    def get(self, i: int) -> int:
+    def get(self, i: int) -> Entry:
         endline, startcol, endcol = self.read()
-        return Entry(i, self.line, endline, startcol, endcol)
+        return Entry(
+            index=i, line=self.line, endline=endline, startcol=startcol, endcol=endcol
+        )
 
     def read_all(self):
         ret = []
@@ -219,10 +225,13 @@ class LineTableReader311(LineTableReader):
         return ret
 
 
-def linetable_reader(code) -> LineTableReader:
+def linetable_reader(code: types.CodeTypeBase) -> LineTableReader:
     if code.python_version < (3, 10):
+        assert isinstance(code, types.CodeType_3_8)
         return LineTableReader38(code)
     elif code.python_version == (3, 10):
+        assert isinstance(code, types.CodeType_3_8)
         return LineTableReader310(code)
     else:
+        assert isinstance(code, types.CodeType_3_11)
         return LineTableReader311(code)

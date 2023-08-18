@@ -17,7 +17,7 @@
 import unittest
 
 from . import base
-from pyc_utils import marshal
+from pyc_utils import types
 from pyc_utils import pyc
 
 
@@ -29,7 +29,7 @@ class TestLoader(unittest.TestCase):
             path = base.test_pyc("basic", version)
             with open(path, "rb") as f:
                 code = pyc.load(f)
-            self.assertIsInstance(code, marshal.CodeTypeBase)
+            self.assertIsInstance(code, types.CodeTypeBase)
             self.assertEqual(version, code.python_version)
 
     def test_loads(self):
@@ -38,7 +38,7 @@ class TestLoader(unittest.TestCase):
             with open(path, "rb") as f:
                 data = f.read()
             code = pyc.loads(data)
-            self.assertIsInstance(code, marshal.CodeTypeBase)
+            self.assertIsInstance(code, types.CodeTypeBase)
             self.assertEqual(version, code.python_version)
 
 

@@ -2,8 +2,9 @@ from dataclasses import dataclass
 
 from typing import Iterable, List, Optional, Tuple
 
-from pyc_utils import linetable
-from pyc_utils import mapping
+from . import linetable
+from . import mapping
+from . import types
 
 
 # From cpython/Include/opcodes.h
@@ -19,20 +20,6 @@ class RawOpcode:
     end: int
     op: int
     arg: Optional[int]
-
-
-@dataclass
-class Opcode:
-    """Opcode with names and line numbers."""
-
-    index: int
-    line: int
-    op: int
-    name: str
-    arg: Optional[int]
-
-    def __str__(self):
-        return f"{self.line:>5}{self.index:>6}  {self.name:<30}{self.arg}"
 
 
 def wordcode_reader(data: bytes) -> Iterable[RawOpcode]:
@@ -55,7 +42,7 @@ def wordcode_reader(data: bytes) -> Iterable[RawOpcode]:
             yield RawOpcode(pos, pos + 2, op, oparg)
 
 
-def dis(code) -> List[Opcode]:
+def dis(code: types.CodeTypeBase) -> List[types.Opcode]:
     """Disassemble code."""
     lt = linetable.linetable_reader(code)
     opmap = mapping.get_mapping(code.python_version)
@@ -65,6 +52,6 @@ def dis(code) -> List[Opcode]:
             continue
         name = opmap[o.op]
         pos = lt.get(o.start)
-        op = Opcode(index=o.start, name=name, line=pos.line, op=o.op, arg=o.arg)
+        op = types.Opcode(index=o.start, name=name, line=pos.line, op=o.op, arg=o.arg)
         ret.append(op)
     return ret
