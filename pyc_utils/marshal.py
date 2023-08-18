@@ -127,8 +127,9 @@ class MarshalReader:
             c = self._read_byte()
             if c & Flags.REF:
                 # This element might recursively contain other elements, which
-                # themselves store things in the refs table. So we need to determine the
-                # index position *before* reading the contents of this element.
+                # themselves store things in the refs table. So we need to
+                # determine the index position *before* reading the contents of
+                # this element.
                 idx = self._reserve_ref()
                 result = MarshalReader._DISPATCH[c & ~Flags.REF](self)
                 self.refs[idx] = result
@@ -455,7 +456,9 @@ def loads(data: bytes, python_version: Tuple[int, int]):
     if not um.eof():
         leftover = um.bufstr[um.bufpos :]
         if len(leftover) > 80:
-            raise BufferError(f"trailing bytes in marshal data ({um.bufpos}...)")
+            raise BufferError(
+                f"trailing bytes in marshal data ({um.bufpos}...)"
+            )
         else:
             raise BufferError(
                 f"trailing bytes in marshal data ({um.bufpos}...): {leftover}"

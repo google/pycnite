@@ -48,8 +48,8 @@ class LineTableReader(abc.ABC):
         This does NOT allow random access. Call with incremental numbers.
 
         Args:
-          i: The byte position in the bytecode. i needs to stay constant or increase
-            between calls.
+          i: The byte position in the bytecode. i needs to stay constant or
+          increase between calls.
 
         Returns:
           The line number corresponding to the position at i.
@@ -215,7 +215,11 @@ class LineTableReader311(LineTableReader):
     def get(self, i: int) -> Entry:
         endline, startcol, endcol = self.read()
         return Entry(
-            index=i, line=self.line, endline=endline, startcol=startcol, endcol=endcol
+            index=i,
+            line=self.line,
+            endline=endline,
+            startcol=startcol,
+            endcol=endcol,
         )
 
     def read_all(self):

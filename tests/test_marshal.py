@@ -82,7 +82,9 @@ class TestMarshalReader(Base):
         self.assertEqual(self.load(b"l\xfe\xff\xff\xff\1\0\2\0"), -65537)
 
     def test_load_string(self):
-        self.assertStrictEqual(self.load(b"s\4\0\0\0test", (3, 9)), bytes(b"test"))
+        self.assertStrictEqual(
+            self.load(b"s\4\0\0\0test", (3, 9)), bytes(b"test")
+        )
 
     def test_load_interned(self):
         self.assertStrictEqual(self.load(b"t\4\0\0\0test"), "test")
@@ -116,7 +118,9 @@ class TestMarshalReader(Base):
         self.assertEqual(self.load(b"<\3\0\0\0FTN"), {True, False, None})
 
     def test_load_frozenset(self):
-        self.assertEqual(self.load(b">\3\0\0\0FTN"), frozenset([True, False, None]))
+        self.assertEqual(
+            self.load(b">\3\0\0\0FTN"), frozenset([True, False, None])
+        )
 
     def test_load_ref(self):
         data = (

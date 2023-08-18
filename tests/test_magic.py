@@ -28,7 +28,9 @@ class TestMagic(unittest.TestCase):
             path = base.test_pyc("basic", version)
             with open(path, "rb") as f:
                 magic_number = f.read(2)
-            self.assertEqual(version, magic.magic_number_to_version(magic_number))
+            self.assertEqual(
+                version, magic.magic_number_to_version(magic_number)
+            )
 
 
 if __name__ == "__main__":

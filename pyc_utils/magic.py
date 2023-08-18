@@ -188,8 +188,8 @@ def magic_number_to_version(magic_number):
     because Python bytecode encoding doesn't change between micro version.
 
     Arguments:
-      magic_number: A 16 bit number, either as an integer or little-endian encoded
-        as a string.
+      magic_number: A 16 bit number, either as an integer or little-endian
+      encoded as a string.
 
     Returns:
       A tuple (major, minor), e.g. (3, 7).
