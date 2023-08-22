@@ -31,8 +31,7 @@ class TestLineTable(unittest.TestCase):
         n_lines = len(src)
         for version in base.VERSIONS:
             path = base.test_pyc("trivial", version)
-            with open(path, "rb") as f:
-                code = pyc.load(f)
+            code = pyc.load_file(path)
             lt = linetable.linetable_reader(code)
             entries = lt.read_all()
             self.assertEqual(entries[-1].line, n_lines)

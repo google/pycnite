@@ -26,8 +26,7 @@ class TestBytecode(unittest.TestCase):
 
     def test_reader(self):
         path = base.test_pyc("trivial", (3, 11))
-        with open(path, "rb") as f:
-            code = pyc.load(f)
+        code = pyc.load_file(path)
         opcodes = [x.name for x in bytecode.dis(code)]
         expected = [
             "RESUME",

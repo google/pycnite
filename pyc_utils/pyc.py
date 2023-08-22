@@ -23,13 +23,13 @@ from . import marshal
 
 
 def load(fi: IO[bytes]):
-    """Parse pyc data from a file.
+    """Parse pyc data from a stream.
 
     Args:
       fi: A file-like object.
 
     Returns:
-      An instance of marshal.CodeTypeBase.
+      An instance of types.CodeTypeBase.
 
     Raises:
       IOError: If we can't read the file or the file is malformed.
@@ -50,6 +50,22 @@ def loads(data: bytes | str):
       data: pyc data
 
     Returns:
-      An instance of marshal.CodeTypeBase.
+      An instance of types.CodeTypeBase.
     """
     return load(io.BytesIO(data))
+
+
+def load_file(path: str):
+    """Parse pyc data from a file.
+
+    Args:
+      path: A file path.
+
+    Returns:
+      An instance of types.CodeTypeBase.
+
+    Raises:
+      IOError: If we can't read the file or the file is malformed.
+    """
+    with open(path, "rb") as f:
+      return load(f)

@@ -41,6 +41,13 @@ class TestLoader(unittest.TestCase):
             self.assertIsInstance(code, types.CodeTypeBase)
             self.assertEqual(version, code.python_version)
 
+    def test_load_file(self):
+        for version in base.VERSIONS:
+            path = base.test_pyc("basic", version)
+            code = pyc.load_file(path)
+            self.assertIsInstance(code, types.CodeTypeBase)
+            self.assertEqual(version, code.python_version)
+
 
 if __name__ == "__main__":
     unittest.main()
