@@ -58,18 +58,95 @@ def wordcode_reader(data: bytes) -> Iterable[RawOpcode]:
             yield RawOpcode(pos, pos + 2, op, oparg)
 
 
-def dis(code: types.CodeTypeBase) -> List[types.Opcode]:
+# In python 3.11+ attributes like co_consts can be None, so following
+# cpython/Lib/dis.py we define an UNKNOWN value for args whose value we cannot
+# calculate.
+class _Unknown:
+    def __repr__(self):
+        return "<unknown>"
+
+
+# Sentinel to represent values that cannot be calculated
+UNKNOWN = _Unknown()
+
+
+def _is_backward_jump(name):
+    return "JUMP_BACKWARD" in name
+
+
+class Disassembler:
     """Disassemble code."""
-    lt = linetable.linetable_reader(code)
-    opmap = mapping.get_mapping(code.python_version)
-    ret = []
-    for o in wordcode_reader(code.co_code):
-        if o.op == 0:  # CACHE
-            continue
-        name = opmap[o.op]
-        pos = lt.get(o.start)
-        op = types.Opcode(
-            index=o.start, name=name, line=pos.line, op=o.op, arg=o.arg
-        )
-        ret.append(op)
-    return ret
+
+    def __init__(self, code):
+        self.code = code
+        self.python_version = code.python_version
+        self.opmap = mapping.get_mapping(code.python_version)
+        if self.python_version < (3, 11):
+            self.cell_names = code.co_cellvars + code.co_freevars
+
+    def _lookup(self, vals: Optional[tuple], arg: int):
+        if vals is None:
+            return UNKNOWN
+        return vals[arg]
+
+    def _decode_arg(self, name: str, arg_type: int, arg: int, end_pos: int):
+        if self.python_version >= (3, 11):
+            if name == "LOAD_GLOBAL":
+                return arg // 2
+        elif self.python_version >= (3, 10):
+            if arg_type == mapping.JREL:
+                signed_arg = -arg if _is_backward_jump(name) else arg
+                return signed_arg * 2 + end_pos
+            elif arg_type == mapping.JABS:
+                return arg * 2
+        else:
+            if arg_type == mapping.JREL:
+                return arg + end_pos
+        return arg
+
+    def _get_argval(self, name: str, arg: int, end_pos: int):
+        arg_type = mapping.arg_type(name)
+        arg = self._decode_arg(name, arg_type, arg, end_pos)
+        if arg_type == mapping.CONST:
+            return self._lookup(self.code.co_consts, arg)
+        elif arg_type == mapping.NAME:
+            return self._lookup(self.code.co_names, arg)
+        elif arg_type == mapping.LOCAL:
+            if self.python_version >= (3, 11):
+                return self._lookup(self.code.co_localsplusnames, arg)
+            else:
+                return self.code.co_varnames[arg]
+        elif arg_type == mapping.FREE:
+            if self.python_version >= (3, 11):
+                return self._lookup(self.code.co_localsplusnames, arg)
+            else:
+                return self.cell_names[arg]
+        else:
+            return arg
+
+    def dis(self) -> List[types.Opcode]:
+        """Disassemble code."""
+        lt = linetable.linetable_reader(self.code)
+        ret = []
+        for o in wordcode_reader(self.code.co_code):
+            if o.op == 0:  # CACHE
+                continue
+            name = self.opmap[o.op]
+            pos = lt.get(o.start)
+            argval = self._get_argval(name, o.arg, o.end)
+            if isinstance(argval, types.CodeTypeBase):
+                argval = f"<code:{argval.co_name}>"
+            op = types.Opcode(
+                index=o.start,
+                name=name,
+                line=pos.line,
+                op=o.op,
+                arg=o.arg,
+                argval=argval,
+            )
+            ret.append(op)
+        return ret
+
+
+def dis(code):
+    return Disassembler(code).dis()

@@ -16,7 +16,7 @@
 
 from dataclasses import dataclass
 
-from typing import List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 
 @dataclass(kw_only=True)
@@ -71,6 +71,10 @@ class Opcode:
     op: int
     name: str
     arg: Optional[int]
+    argval: Any
 
     def __str__(self):
-        return f"{self.line:>5}{self.index:>6}  {self.name:<30}{self.arg}"
+        if self.arg is not None:
+            return f"{self.line:>5}{self.index:>6}  {self.name:<30}{self.arg:>5} {self.argval}"
+        else:
+            return f"{self.line:>5}{self.index:>6}  {self.name:<30}"

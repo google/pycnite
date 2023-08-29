@@ -68,4 +68,4 @@ def load_file(path: str):
       IOError: If we can't read the file or the file is malformed.
     """
     with open(path, "rb") as f:
-      return load(f)
+        return load(f)

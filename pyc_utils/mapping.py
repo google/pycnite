@@ -18,6 +18,7 @@ from typing import Dict, Optional, Tuple
 
 OpMap = Dict[int, str]
 Overlay = Dict[int, Optional[str]]
+OpArgs = Dict[str, int]
 
 
 def _overlay_mapping(mapping: OpMap, new_entries: Overlay) -> OpMap:
@@ -278,3 +279,78 @@ def get_mapping(version: Tuple[int, int]) -> OpMap:
         (3, 10): PYTHON_3_10_MAPPING,
         (3, 11): PYTHON_3_11_MAPPING,
     }[version]
+
+
+# ----------------------------------------------------------
+# Opcode argument types
+
+CONST = 1  # references the constant table
+NAME = 2  # references the name table
+JREL = 4  # relative jump
+JABS = 8  # absolute jump
+LOCAL = 16  # references the varnames table
+FREE = 32  # references "free variable" cells
+NARGS = 64  # stores number of args + kwargs
+
+
+ARG_TYPES: OpArgs = {
+    "STORE_NAME": NAME,
+    "DELETE_NAME": NAME,
+    "FOR_ITER": JREL,
+    "STORE_ATTR": NAME,
+    "DELETE_ATTR": NAME,
+    "STORE_GLOBAL": NAME,
+    "DELETE_GLOBAL": NAME,
+    "LOAD_CONST": CONST,
+    "LOAD_NAME": NAME,
+    "LOAD_ATTR": NAME,
+    "IMPORT_NAME": NAME,
+    "IMPORT_FROM": NAME,
+    "JUMP_FORWARD": JREL,
+    "JUMP_IF_FALSE_OR_POP": JABS,
+    "JUMP_IF_TRUE_OR_POP": JABS,
+    "JUMP_ABSOLUTE": JABS,
+    "POP_JUMP_IF_FALSE": JABS,
+    "POP_JUMP_IF_TRUE": JABS,
+    "LOAD_GLOBAL": NAME,
+    "CONTINUE_LOOP": JABS,
+    "SETUP_LOOP": JREL,
+    "SETUP_EXCEPT": JREL,
+    "SETUP_FINALLY": JREL,
+    "LOAD_FAST": LOCAL,
+    "STORE_FAST": LOCAL,
+    "DELETE_FAST": LOCAL,
+    "STORE_ANNOTATION": NAME,
+    "CALL_FUNCTION": NARGS,
+    "LOAD_CLOSURE": FREE,
+    "LOAD_DEREF": FREE,
+    "STORE_DEREF": FREE,
+    "DELETE_DEREF": FREE,
+    "CALL_FUNCTION_VAR": NARGS,
+    "CALL_FUNCTION_KW": NARGS,
+    "CALL_FUNCTION_VAR_KW": NARGS,
+    "SETUP_WITH": JREL,
+    "LOAD_CLASSDEREF": FREE,
+    "SETUP_ASYNC_WITH": JREL,
+    "LOAD_METHOD": NAME,
+    "CALL_METHOD": NARGS,
+    "CALL_FINALLY": JREL,
+    "JUMP_IF_NOT_EXC_MATCH": JABS,
+    "POP_JUMP_FORWARD_IF_FALSE": JREL,
+    "POP_JUMP_FORWARD_IF_TRUE": JREL,
+    "SEND": JREL,
+    "POP_JUMP_FORWARD_IF_NOT_NONE": JREL,
+    "POP_JUMP_FORWARD_IF_NONE": JREL,
+    "JUMP_BACKWARD_NO_INTERRUPT": JREL,
+    "MAKE_CELL": FREE,
+    "JUMP_BACKWARD": JREL,
+    "KW_NAMES": CONST,
+    "POP_JUMP_BACKWARD_IF_NOT_NONE": JREL,
+    "POP_JUMP_BACKWARD_IF_NONE": JREL,
+    "POP_JUMP_BACKWARD_IF_FALSE": JREL,
+    "POP_JUMP_BACKWARD_IF_TRUE": JREL,
+}
+
+
+def arg_type(name: str):
+    return ARG_TYPES.get(name)
