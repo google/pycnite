@@ -49,22 +49,24 @@ class TestBytecode(unittest.TestCase):
 
     def test_argval(self):
         def run(version):
-          path = base.test_pyc("trivial", version)
-          code = pyc.load_file(path)
-          opcodes = [(x.name, x.argval) for x in bytecode.dis(code)]
-          if version == (3, 11):
-            opcodes = opcodes[1:5]
-          else:
-            opcodes = opcodes[0:4]
-          expected = [
-              ("LOAD_CONST", 1),
-              ("STORE_NAME", "x"),
-              ("LOAD_CONST", 2),
-              ("STORE_NAME", "y"),
-          ]
-          self.assertEqual(opcodes, expected)
+            path = base.test_pyc("trivial", version)
+            code = pyc.load_file(path)
+            opcodes = [(x.name, x.argval) for x in bytecode.dis(code)]
+            if version == (3, 11):
+                opcodes = opcodes[1:5]
+            else:
+                opcodes = opcodes[0:4]
+            expected = [
+                ("LOAD_CONST", 1),
+                ("STORE_NAME", "x"),
+                ("LOAD_CONST", 2),
+                ("STORE_NAME", "y"),
+            ]
+            self.assertEqual(opcodes, expected)
+
         for version in base.VERSIONS:
-          run(version)
+            run(version)
+
 
 if __name__ == "__main__":
     unittest.main()
