@@ -6,4 +6,4 @@ build-backend = "setuptools.build_meta"
 line-length = 80
 
 [tool.pytype]
-inputs = ["pyc_utils/*.py"]
+inputs = ["pycnite/*.py"]

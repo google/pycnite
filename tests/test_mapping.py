@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for pyc_utils.mapping."""
+"""Tests for pycnite.mapping."""
 
 import unittest
 
-from pyc_utils import mapping
+from pycnite import mapping
 
 
 class TestMapping(unittest.TestCase):

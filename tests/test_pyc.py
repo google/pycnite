@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for pyc_utils.pyc."""
+"""Tests for pycnite.pyc."""
 
 import unittest
 
 from . import base
-from pyc_utils import types
-from pyc_utils import pyc
+from pycnite import types
+from pycnite import pyc
 
 
 class TestLoader(unittest.TestCase):

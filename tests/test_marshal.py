@@ -16,7 +16,7 @@
 
 import unittest
 
-from pyc_utils import marshal
+from pycnite import marshal
 
 
 class Base(unittest.TestCase):

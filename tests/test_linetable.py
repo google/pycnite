@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for pyc_utils.linetable."""
+"""Tests for pycnite.linetable."""
 
 import unittest
 
 from . import base
-from pyc_utils import linetable
-from pyc_utils import pyc
+from pycnite import linetable
+from pycnite import pyc
 
 
 class TestLineTable(unittest.TestCase):

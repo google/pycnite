@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for pyc_utils.magic."""
+"""Tests for pycnite.magic."""
 
 import unittest
 
 from . import base
-from pyc_utils import magic
+from pycnite import magic
 
 
 class TestMagic(unittest.TestCase):

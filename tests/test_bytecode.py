@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for pyc_utils.bytecode."""
+"""Tests for pycnite.bytecode."""
 
 import unittest
 
 from . import base
-from pyc_utils import bytecode
-from pyc_utils import pyc
+from pycnite import bytecode
+from pycnite import pyc
 
 
 class TestBytecode(unittest.TestCase):
