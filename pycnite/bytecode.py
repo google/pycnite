@@ -79,13 +79,13 @@ class Disassembler:
 
     def __init__(self, code):
         self.code = code
-        self.python_version = code.python_version
-        self.opmap = mapping.get_mapping(code.python_version)
+        self.python_version = code.python_version[:2]
+        self.opmap = mapping.get_mapping(self.python_version)
         if self.python_version < (3, 11):
             self.cell_names = code.co_cellvars + code.co_freevars
 
     def _lookup(self, vals: Optional[tuple], arg: int):
-        if vals is None:
+        if vals is None or arg >= len(vals):
             return UNKNOWN
         return vals[arg]
 
@@ -115,12 +115,12 @@ class Disassembler:
             if self.python_version >= (3, 11):
                 return self._lookup(self.code.co_localsplusnames, arg)
             else:
-                return self.code.co_varnames[arg]
+                return self._lookup(self.code.co_varnames, arg)
         elif arg_type == mapping.FREE:
             if self.python_version >= (3, 11):
                 return self._lookup(self.code.co_localsplusnames, arg)
             else:
-                return self.cell_names[arg]
+                return self._lookup(self.cell_names, arg)
         else:
             return arg
 
