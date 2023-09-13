@@ -42,6 +42,7 @@ def wordcode_reader(data: bytes) -> Iterable[RawOpcode]:
     """Reads binary data from pyc files."""
 
     extended_arg = 0
+    start = 0
     for pos in range(0, len(data), 2):
         op = data[pos]
         if op == EXTENDED_ARG:
@@ -55,7 +56,8 @@ def wordcode_reader(data: bytes) -> Iterable[RawOpcode]:
             extended_arg = 0
         # Don't yield EXTENDED_ARG; it is part of the next opcode.
         if op != EXTENDED_ARG:
-            yield RawOpcode(pos, pos + 2, op, oparg)
+            yield RawOpcode(start, pos + 2, op, oparg)
+            start = pos + 2
 
 
 # In python 3.11+ attributes like co_consts can be None, so following
