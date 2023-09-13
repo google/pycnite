@@ -66,7 +66,7 @@ class CodeType311(CodeTypeBase):
 class Opcode:
     """Opcode with names and line numbers."""
 
-    index: int
+    offset: int
     line: int
     op: int
     name: str
@@ -75,6 +75,6 @@ class Opcode:
 
     def __str__(self):
         if self.arg is not None:
-            return f"{self.line:>5}{self.index:>6}  {self.name:<30}{self.arg:>5} {self.argval}"
+            return f"{self.line:>5}{self.offset:>6}  {self.name:<30}{self.arg:>5} {self.argval}"
         else:
-            return f"{self.line:>5}{self.index:>6}  {self.name:<30}"
+            return f"{self.line:>5}{self.offset:>6}  {self.name:<30}"

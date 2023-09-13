@@ -26,7 +26,7 @@ from . import types
 class Entry:
     """Position information for an opcode."""
 
-    index: int
+    offset: int
     line: int
     # The following are new in 3.11
     endline: Optional[int] = None
@@ -101,7 +101,7 @@ class LineTableReader38(LnotabReader):
             self.pos += 2
             if self.pos < self.end_pos:
                 self.next_addr += self.linetable[self.pos]
-        return Entry(index=i, line=self.lineno)
+        return Entry(offset=i, line=self.lineno)
 
 
 class LineTableReader310(LnotabReader):
@@ -127,7 +127,7 @@ class LineTableReader310(LnotabReader):
             if self.pos < self.end_pos:
                 self.next_addr += self.linetable[self.pos]
                 self.lineno += self.line_delta
-        return Entry(index=i, line=self.lineno)
+        return Entry(offset=i, line=self.lineno)
 
 
 class PyCodeLocation:
@@ -215,7 +215,7 @@ class LineTableReader311(LineTableReader):
     def get(self, i: int) -> Entry:
         endline, startcol, endcol = self.read()
         return Entry(
-            index=i,
+            offset=i,
             line=self.line,
             endline=endline,
             startcol=startcol,
