@@ -67,6 +67,13 @@ class TestBytecode(unittest.TestCase):
         for version in base.VERSIONS:
             run(version)
 
+    def test_extended_arg(self):
+        code = bytearray([144, 10, 144, 20, 100, 1])
+        ops = list(bytecode.wordcode_reader(code))
+        expected_arg = 10 << 16 | 20 << 8 | 1
+        expected = [bytecode.RawOpcode(0, 6, 100, expected_arg)]
+        self.assertEqual(ops, expected)
+
 
 if __name__ == "__main__":
     unittest.main()
