@@ -22,7 +22,7 @@ from typing import List, Optional
 from . import types
 
 
-@dataclasses.dataclass(kw_only=True)
+@dataclasses.dataclass
 class Entry:
     """Position information for an opcode."""
 
