@@ -16,7 +16,7 @@
 
 import io
 
-from typing import IO
+from typing import IO, Union
 
 from . import magic
 from . import marshal
@@ -43,7 +43,7 @@ def load(fi: IO[bytes]):
     return marshal.loads(fi.read(), python_version)
 
 
-def loads(data: bytes | str):
+def loads(data: Union[bytes, str]):
     """Parse pyc data from a string.
 
     Args:

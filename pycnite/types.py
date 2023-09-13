@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from typing import Any, List, Optional, Tuple, Union
 
 
-@dataclass(kw_only=True)
+@dataclass
 class CodeTypeBase:
     """Pure python types.CodeType with python version added."""
 
@@ -40,7 +40,7 @@ class CodeTypeBase:
         return f"<code: {self.co_name}>"
 
 
-@dataclass(kw_only=True)
+@dataclass
 class CodeType38(CodeTypeBase):
     """CodeType for python 3.8 - 3.10."""
 
@@ -51,7 +51,7 @@ class CodeType38(CodeTypeBase):
     co_cellvars: Tuple[str, ...]
 
 
-@dataclass(kw_only=True)
+@dataclass
 class CodeType311(CodeTypeBase):
     """CodeType for python 3.11+."""
 
@@ -62,7 +62,7 @@ class CodeType311(CodeTypeBase):
     co_exceptiontable: bytes
 
 
-@dataclass(kw_only=True)
+@dataclass
 class Opcode:
     """Opcode with names and line numbers."""
 
