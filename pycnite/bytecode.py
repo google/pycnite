@@ -139,7 +139,7 @@ class Disassembler:
             if isinstance(argval, types.CodeTypeBase):
                 argval = f"<code:{argval.co_name}>"
             op = types.Opcode(
-                index=o.start,
+                offset=o.start,
                 name=name,
                 line=pos.line,
                 op=o.op,
