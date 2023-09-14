@@ -75,6 +75,7 @@ class Opcode:
 
     def __str__(self):
         if self.arg is not None:
-            return f"{self.line:>5}{self.offset:>6}  {self.name:<30}{self.arg:>5} {self.argval}"
+            return (f"{self.line:>5}{self.offset:>6}  {self.name:<30}"
+                    f"{self.arg:>5} {self.argval}")
         else:
             return f"{self.line:>5}{self.offset:>6}  {self.name:<30}"
