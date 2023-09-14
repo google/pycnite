@@ -14,6 +14,7 @@
 
 """Tests for pycnite.linetable."""
 
+import itertools
 import unittest
 
 from . import base
@@ -24,17 +25,34 @@ from pycnite import pyc
 class TestLineTable(unittest.TestCase):
     """Test linetable parsing."""
 
+    def _get_linetable(self, testfile, version):
+        path = base.test_pyc(testfile, version)
+        code = pyc.load_file(path)
+        lt = linetable.linetable_reader(code)
+        return lt.read_all()
+
     def test_read(self):
         src_file = base.test_src("trivial")
         with open(src_file, "r") as f:
             src = f.readlines()
         n_lines = len(src)
         for version in base.VERSIONS:
-            path = base.test_pyc("trivial", version)
-            code = pyc.load_file(path)
-            lt = linetable.linetable_reader(code)
-            entries = lt.read_all()
+            entries = self._get_linetable("trivial", version)
             self.assertEqual(entries[-1].line, n_lines)
+
+    def test_flow(self):
+        for version in base.VERSIONS:
+            entries = self._get_linetable("flow", version)
+            lines = [x.line for x in entries]
+            lines = [k for k, _ in itertools.groupby(lines)]
+            # Lines checked against the godbolt.org disassembler
+            if version == (3, 11):
+                expected = [0, 1, 2, 3, 4, 5, 6, 1, 2]
+            elif version == (3, 10):
+                expected = [1, 2, 3, 4, 5, 6, 1, 2]
+            else:
+                expected = [1, 2, 3, 4, 5, 6]
+            self.assertEqual(lines, expected)
 
 
 if __name__ == "__main__":

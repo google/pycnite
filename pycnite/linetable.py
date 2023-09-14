@@ -181,7 +181,6 @@ class LineTableReader311(LineTableReader):
         self.start = self.end
         self.end = self.start + (b & 7) + 1
         if code == PyCodeLocation.INFO_NONE:
-            self.line = -1
             endline = -1
             col = -1
             endcol = -1
