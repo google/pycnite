@@ -74,6 +74,11 @@ class TestBytecode(unittest.TestCase):
         expected = [bytecode.RawOpcode(0, 6, 100, expected_arg)]
         self.assertEqual(ops, expected)
 
-
-if __name__ == "__main__":
-    unittest.main()
+    def test_generator_expression(self):
+        # Check for a corner case in 3.11 generator expressions
+        path = base.test_pyc("genexpr", (3, 11))
+        code = pyc.load_file(path)
+        d = bytecode.dis_all(code)
+        genexpr = d.get_child("f").get_child("<genexpr>")
+        retval = genexpr.opcodes[-1]
+        self.assertEqual((retval.name, retval.line), ("RETURN_VALUE", 2))
