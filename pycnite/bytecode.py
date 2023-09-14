@@ -95,15 +95,14 @@ class Disassembler:
         if self.python_version >= (3, 11):
             if name == "LOAD_GLOBAL":
                 return arg // 2
-        elif self.python_version >= (3, 10):
+        if self.python_version >= (3, 10):
             if arg_type == mapping.JREL:
                 signed_arg = -arg if _is_backward_jump(name) else arg
                 return signed_arg * 2 + end_pos
             elif arg_type == mapping.JABS:
                 return arg * 2
-        else:
-            if arg_type == mapping.JREL:
-                return arg + end_pos
+        if arg_type == mapping.JREL:
+            return arg + end_pos
         return arg
 
     def _get_argval(self, name: str, arg: int, end_pos: int):
