@@ -293,7 +293,7 @@ FREE = 32  # references "free variable" cells
 NARGS = 64  # stores number of args + kwargs
 
 
-ARG_TYPES: OpArgs = {
+PYTHON_3_8_ARG_TYPES: OpArgs = {
     "STORE_NAME": NAME,
     "DELETE_NAME": NAME,
     "FOR_ITER": JREL,
@@ -352,5 +352,16 @@ ARG_TYPES: OpArgs = {
 }
 
 
-def arg_type(name: str):
-    return ARG_TYPES.get(name)
+PYTHON_3_11_ARG_TYPES: OpArgs = {
+    **PYTHON_3_8_ARG_TYPES,
+    "JUMP_IF_FALSE_OR_POP": JREL,
+    "JUMP_IF_TRUE_OR_POP": JREL,
+}
+
+
+def arg_type(name: str, version: Tuple[int, int]) -> Optional[int]:
+    if version >= (3, 11):
+        argmap = PYTHON_3_11_ARG_TYPES
+    else:
+        argmap = PYTHON_3_8_ARG_TYPES
+    return argmap.get(name)

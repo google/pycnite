@@ -106,7 +106,7 @@ class Disassembler:
         return arg
 
     def _get_argval(self, name: str, arg: int, end_pos: int):
-        arg_type = mapping.arg_type(name)
+        arg_type = mapping.arg_type(name, self.python_version)
         arg = self._decode_arg(name, arg_type, arg, end_pos)
         if arg_type == mapping.CONST:
             return self._lookup(self.code.co_consts, arg)
