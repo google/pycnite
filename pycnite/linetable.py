@@ -212,7 +212,11 @@ class LineTableReader311(LineTableReader):
         return (endline, col, endcol)
 
     def get(self, i: int) -> Entry:
-        endline, startcol, endcol = self.read()
+        if self.pos >= self.end_pos:
+            # Happens for the final RETURN_VALUE in generator expressions
+            endline = startcol = endcol = -1
+        else:
+            endline, startcol, endcol = self.read()
         return Entry(
             offset=i,
             line=self.line,
