@@ -149,5 +149,16 @@ class Disassembler:
         return ret
 
 
-def dis(code):
+def dis(code: types.CodeTypeBase):
+    """Disassemble a single piece of top-level code."""
     return Disassembler(code).dis()
+
+
+def dis_all(code: types.CodeTypeBase) -> types.DisassembledCode:
+    """Recursively disassemble code and contained code blocks."""
+    opcodes = dis(code)
+    ret = types.DisassembledCode(code=code, opcodes=opcodes, children=[])
+    for child in code.co_consts:
+        if hasattr(child, "co_code"):
+            ret.children.append(dis_all(child))
+    return ret

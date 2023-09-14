@@ -74,8 +74,48 @@ class Opcode:
     argval: Any
 
     def __str__(self):
+        ret = f"{self.line:>5}{self.offset:>6}  {self.name:<30}"
         if self.arg is not None:
-            return (f"{self.line:>5}{self.offset:>6}  {self.name:<30}"
-                    f"{self.arg:>5} {self.argval}")
-        else:
-            return f"{self.line:>5}{self.offset:>6}  {self.name:<30}"
+            ret += f" {self.arg:>5} {self.argval}"
+        return ret
+
+
+@dataclass
+class DisassembledCode:
+    """Tree of bytecode and associated opcode list."""
+
+    code: CodeTypeBase
+    opcodes: List[Opcode]
+    children: "List[DisassembledCode]"
+
+    @property
+    def name(self):
+        return self.code.co_name
+
+    @property
+    def python_version(self):
+        return self.code.python_version
+
+    def get_child(self, name) -> "Optional[DisassembledCode]":
+        """Get the first child with name = `name`."""
+        for c in self.children:
+            if c.name == name:
+                return c
+
+    def pretty_format(self, indent=0):
+        header = (
+            f"-- <code object {self.name}>, file: {self.code.co_filename}, "
+            f"line: {self.code.co_firstlineno}"
+        )
+        out = [(indent, header)]
+        for op in self.opcodes:
+            out.append((indent, str(op)))
+        for c in self.children:
+            out.append((0, ""))
+            out.extend(c.pretty_format(indent + 2))
+        return out
+
+    def pretty_print(self, indent=0):
+        lines = self.pretty_format(indent)
+        for indent, text in lines:
+            print(" " * indent, text)
