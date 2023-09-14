@@ -16,7 +16,7 @@
 
 from dataclasses import dataclass
 
-from typing import Iterable, List, Optional
+from typing import cast, Iterable, List, Optional
 
 from . import linetable
 from . import mapping
@@ -84,6 +84,7 @@ class Disassembler:
         self.python_version = code.python_version[:2]
         self.opmap = mapping.get_mapping(self.python_version)
         if self.python_version < (3, 11):
+            code = cast(types.CodeType38, code)
             self.cell_names = code.co_cellvars + code.co_freevars
 
     def _lookup(self, vals: Optional[tuple], arg: int):

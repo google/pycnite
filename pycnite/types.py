@@ -117,5 +117,5 @@ class DisassembledCode:
 
     def pretty_print(self, indent=0):
         lines = self.pretty_format(indent)
-        for indent, text in lines:
-            print(" " * indent, text)
+        for i, text in lines:
+            print(" " * i, text)
