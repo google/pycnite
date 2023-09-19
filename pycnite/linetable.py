@@ -142,19 +142,14 @@ class PyCodeLocation:
     INFO_NONE = 15
 
 
-class LineTableReader311(LineTableReader):
-    """Read code.co_linetable for Python 3.11+"""
+class VarintReader:
+    """Mixin to read and parse packed varints in 3.11+."""
 
-    def __init__(self, code: types.CodeType311):
-        super().__init__(code)
-        self.linetable = code.co_linetable
-        self.start = code.co_firstlineno
-        self.end = self.start
-        self.line = self.start
-        self.end_pos = len(self.linetable)
+    table: list
+    pos: int
 
     def _read_byte(self):
-        b = self.linetable[self.pos]
+        b = self.table[self.pos]
         self.pos += 1
         return b
 
@@ -174,6 +169,18 @@ class LineTableReader311(LineTableReader):
             return -(uval >> 1)
         else:
             return uval >> 1
+
+
+class LineTableReader311(LineTableReader, VarintReader):
+    """Read code.co_linetable for Python 3.11+"""
+
+    def __init__(self, code: types.CodeType311):
+        super().__init__(code)
+        self.table = code.co_linetable
+        self.start = code.co_firstlineno
+        self.end = self.start
+        self.line = self.start
+        self.end_pos = len(self.table)
 
     def read(self):
         b = self._read_byte()
@@ -231,6 +238,48 @@ class LineTableReader311(LineTableReader):
         while self.pos < self.end_pos:
             ret.append(self.get(i))
             i = self.start * 2
+        return ret
+
+
+@dataclasses.dataclass
+class ExceptionTableEntry:
+    """Exception table entry."""
+
+    start: int
+    end: int
+    target: int
+    depth: int
+    lasti: bool
+
+    def pretty_print(self):
+        return (
+            f"{self.start} to {self.end} -> {self.target} "
+            f"[{self.depth}] {'lasti' if self.lasti else ''}"
+        )
+
+
+class ExceptionTableReader(VarintReader):
+    """Read the exception table in 3.11+."""
+
+    def __init__(self, code: types.CodeType311):
+        self.table = code.co_exceptiontable
+        self.pos = 0
+        self.end_pos = len(self.table)
+
+    def read(self):
+        start = self._read_varint() * 2
+        length = self._read_varint() * 2
+        end = start + length - 2
+        target = self._read_varint() * 2
+        dl = self._read_varint()
+        depth = dl >> 1
+        lasti = bool(dl & 1)
+        return ExceptionTableEntry(start, end, target, depth, lasti)
+
+    def read_all(self):
+        ret = []
+        while self.pos < self.end_pos:
+            ret.append(self.read())
         return ret
 
 

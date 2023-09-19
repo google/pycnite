@@ -55,5 +55,32 @@ class TestLineTable(unittest.TestCase):
             self.assertEqual(lines, expected)
 
 
+class TestExceptionTable(unittest.TestCase):
+    """Test exceptiontable parsing."""
+
+    def test_basic(self):
+        # Exception table is new in 3.11
+        path = base.test_pyc("exception", (3, 11))
+        code = pyc.load_file(path)
+        et = linetable.ExceptionTableReader(code)
+        actual = et.read_all()
+        entry = linetable.ExceptionTableEntry
+        # Verified using godbolt
+        expected = [
+            entry(start=4, end=22, target=26, depth=0, lasti=False),
+            entry(start=24, end=24, target=66, depth=0, lasti=False),
+            entry(start=26, end=34, target=58, depth=1, lasti=True),
+            entry(start=36, end=38, target=66, depth=0, lasti=False),
+            entry(start=40, end=46, target=58, depth=1, lasti=True),
+            entry(start=48, end=50, target=66, depth=0, lasti=False),
+            entry(start=52, end=52, target=58, depth=1, lasti=True),
+            entry(start=54, end=62, target=66, depth=0, lasti=False),
+            entry(start=66, end=68, target=70, depth=1, lasti=True),
+            entry(start=78, end=86, target=92, depth=0, lasti=False),
+            entry(start=92, end=94, target=102, depth=1, lasti=True),
+        ]
+        self.assertEqual(actual, expected)
+
+
 if __name__ == "__main__":
     unittest.main()
