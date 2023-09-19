@@ -33,7 +33,7 @@ class CodeTypeBase:
     co_consts: List[object]
     co_names: List[str]
     co_filename: Union[bytes, str]
-    co_name: int
+    co_name: str
     co_firstlineno: int
 
     def __repr__(self):
