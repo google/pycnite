@@ -241,23 +241,6 @@ class LineTableReader311(LineTableReader, VarintReader):
         return ret
 
 
-@dataclasses.dataclass
-class ExceptionTableEntry:
-    """Exception table entry."""
-
-    start: int
-    end: int
-    target: int
-    depth: int
-    lasti: bool
-
-    def pretty_print(self):
-        return (
-            f"{self.start} to {self.end} -> {self.target} "
-            f"[{self.depth}] {'lasti' if self.lasti else ''}"
-        )
-
-
 class ExceptionTableReader(VarintReader):
     """Read the exception table in 3.11+."""
 
@@ -274,7 +257,9 @@ class ExceptionTableReader(VarintReader):
         dl = self._read_varint()
         depth = dl >> 1
         lasti = bool(dl & 1)
-        return ExceptionTableEntry(start, end, target, depth, lasti)
+        return types.ExceptionTableEntry(
+            start=start, end=end, target=target, depth=depth, lasti=lasti
+        )
 
     def read_all(self):
         ret = []

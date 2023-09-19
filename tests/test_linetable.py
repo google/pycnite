@@ -20,6 +20,7 @@ import unittest
 from . import base
 from pycnite import linetable
 from pycnite import pyc
+from pycnite import types
 
 
 class TestLineTable(unittest.TestCase):
@@ -64,7 +65,7 @@ class TestExceptionTable(unittest.TestCase):
         code = pyc.load_file(path)
         et = linetable.ExceptionTableReader(code)
         actual = et.read_all()
-        entry = linetable.ExceptionTableEntry
+        entry = types.ExceptionTableEntry
         # Verified using godbolt
         expected = [
             entry(start=4, end=22, target=26, depth=0, lasti=False),

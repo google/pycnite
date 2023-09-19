@@ -150,7 +150,7 @@ class Disassembler:
         return ret
 
 
-def dis(code: types.CodeTypeBase):
+def dis(code: types.CodeTypeBase) -> List[types.Opcode]:
     """Disassemble a single piece of top-level code."""
     return Disassembler(code).dis()
 
@@ -158,7 +158,19 @@ def dis(code: types.CodeTypeBase):
 def dis_all(code: types.CodeTypeBase) -> types.DisassembledCode:
     """Recursively disassemble code and contained code blocks."""
     opcodes = dis(code)
-    ret = types.DisassembledCode(code=code, opcodes=opcodes, children=[])
+    if code.python_version >= (3, 11):
+        code = cast(types.CodeType311, code)
+        et = linetable.ExceptionTableReader(code)
+        exc_table = types.ExceptionTable(et.read_all())
+    else:
+        # Setting this to None will complicate typechecking without adding any
+        # real safety; client code will typically check for version >= 3.11
+        # before accessing the exception table, rather than doing type or
+        # presence checks on the attribute.
+        exc_table = types.ExceptionTable([])
+    ret = types.DisassembledCode(
+        code=code, opcodes=opcodes, exception_table=exc_table, children=[]
+    )
     for child in code.co_consts:
         if hasattr(child, "co_code"):
             ret.children.append(dis_all(child))

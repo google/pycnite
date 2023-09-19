@@ -82,3 +82,16 @@ class TestBytecode(unittest.TestCase):
         genexpr = d.get_child("f").get_child("<genexpr>")
         retval = genexpr.opcodes[-1]
         self.assertEqual((retval.name, retval.line), ("RETURN_VALUE", 2))
+
+    def test_exception_table(self):
+        def run(version):
+            path = base.test_pyc("exception", version)
+            code = pyc.load_file(path)
+            dis = bytecode.dis_all(code)
+            if version == (3, 11):
+                self.assertTrue(dis.exception_table)
+            else:
+                self.assertFalse(dis.exception_table)
+
+        for version in base.VERSIONS:
+            run(version)
