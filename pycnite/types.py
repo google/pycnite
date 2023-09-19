@@ -81,11 +81,39 @@ class Opcode:
 
 
 @dataclass
+class ExceptionTableEntry:
+    """Exception table entry in python 3.11+."""
+
+    start: int
+    end: int
+    target: int
+    depth: int
+    lasti: bool
+
+    def pretty_format(self):
+        return (
+            f"{self.start} to {self.end} -> {self.target} "
+            f"[{self.depth}] {'lasti' if self.lasti else ''}"
+        )
+
+
+@dataclass
+class ExceptionTable:
+    """Exception table in python 3.11+."""
+
+    entries: List[ExceptionTableEntry]
+
+    def __bool__(self):
+        return bool(self.entries)
+
+
+@dataclass
 class DisassembledCode:
     """Tree of bytecode and associated opcode list."""
 
     code: CodeTypeBase
     opcodes: List[Opcode]
+    exception_table: ExceptionTable
     children: "List[DisassembledCode]"
 
     @property
@@ -110,6 +138,10 @@ class DisassembledCode:
         out = [(indent, header)]
         for op in self.opcodes:
             out.append((indent, str(op)))
+        if self.exception_table:
+            out.append((indent, "ExceptionTable:"))
+            for e in self.exception_table.entries:
+                out.append((indent + 2, e.pretty_format()))
         for c in self.children:
             out.append((0, ""))
             out.extend(c.pretty_format(indent + 2))
