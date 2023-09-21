@@ -142,11 +142,16 @@ class PyCodeLocation:
     INFO_NONE = 15
 
 
-class VarintReader:
-    """Mixin to read and parse packed varints in 3.11+."""
+class LineTableReader311(LineTableReader):
+    """Read code.co_linetable for Python 3.11+"""
 
-    table: list
-    pos: int
+    def __init__(self, code: types.CodeType311):
+        super().__init__(code)
+        self.table = code.co_linetable
+        self.start = code.co_firstlineno
+        self.end = self.start
+        self.line = self.start
+        self.end_pos = len(self.table)
 
     def _read_byte(self):
         b = self.table[self.pos]
@@ -169,18 +174,6 @@ class VarintReader:
             return -(uval >> 1)
         else:
             return uval >> 1
-
-
-class LineTableReader311(LineTableReader, VarintReader):
-    """Read code.co_linetable for Python 3.11+"""
-
-    def __init__(self, code: types.CodeType311):
-        super().__init__(code)
-        self.table = code.co_linetable
-        self.start = code.co_firstlineno
-        self.end = self.start
-        self.line = self.start
-        self.end_pos = len(self.table)
 
     def read(self):
         b = self._read_byte()
@@ -241,13 +234,27 @@ class LineTableReader311(LineTableReader, VarintReader):
         return ret
 
 
-class ExceptionTableReader(VarintReader):
+class ExceptionTableReader:
     """Read the exception table in 3.11+."""
 
     def __init__(self, code: types.CodeType311):
         self.table = code.co_exceptiontable
         self.pos = 0
         self.end_pos = len(self.table)
+
+    def _read_byte(self):
+        b = self.table[self.pos]
+        self.pos += 1
+        return b
+
+    def _read_varint(self):
+        read = self._read_byte()
+        val = read & 63
+        while read & 64:
+            val <<= 6
+            read = self._read_byte()
+            val |= read & 63
+        return val
 
     def read(self):
         start = self._read_varint() * 2
