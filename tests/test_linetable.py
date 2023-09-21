@@ -82,6 +82,26 @@ class TestExceptionTable(unittest.TestCase):
         ]
         self.assertEqual(actual, expected)
 
+    def test_complex(self):
+        path = base.test_pyc("complex_exception", (3, 11))
+        code = pyc.load_file(path)
+        et = linetable.ExceptionTableReader(code.co_consts[0])
+        actual = et.read_all()
+        entry = types.ExceptionTableEntry
+        # Verified using godbolt
+        expected = [
+            entry(start=8, end=20, target=162, depth=0, lasti=False),
+            entry(start=22, end=94, target=96, depth=1, lasti=True),
+            entry(start=96, end=102, target=104, depth=3, lasti=True),
+            entry(start=104, end=108, target=162, depth=0, lasti=False),
+            entry(start=110, end=110, target=104, depth=3, lasti=True),
+            entry(start=112, end=158, target=162, depth=0, lasti=False),
+            entry(start=162, end=180, target=286, depth=1, lasti=True),
+            entry(start=182, end=264, target=276, depth=1, lasti=True),
+            entry(start=276, end=284, target=286, depth=1, lasti=True),
+        ]
+        self.assertEqual(actual, expected)
+
 
 if __name__ == "__main__":
     unittest.main()
