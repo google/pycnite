@@ -27,6 +27,7 @@ class Entry:
     """Position information for an opcode."""
 
     offset: int
+    end_offset: int
     line: int
     # The following are new in 3.11
     endline: Optional[int] = None
@@ -101,7 +102,7 @@ class LineTableReader38(LnotabReader):
             self.pos += 2
             if self.pos < self.end_pos:
                 self.next_addr += self.linetable[self.pos]
-        return Entry(offset=i, line=self.lineno)
+        return Entry(offset=i, end_offset=self.pos, line=self.lineno)
 
 
 class LineTableReader310(LnotabReader):
@@ -127,7 +128,7 @@ class LineTableReader310(LnotabReader):
             if self.pos < self.end_pos:
                 self.next_addr += self.linetable[self.pos]
                 self.lineno += self.line_delta
-        return Entry(offset=i, line=self.lineno)
+        return Entry(offset=i, end_offset=self.pos, line=self.lineno)
 
 
 class PyCodeLocation:
@@ -148,9 +149,9 @@ class LineTableReader311(LineTableReader):
     def __init__(self, code: types.CodeType311):
         super().__init__(code)
         self.table = code.co_linetable
-        self.start = code.co_firstlineno
-        self.end = self.start
-        self.line = self.start
+        self.line = code.co_firstlineno
+        self.start = -1
+        self.end = 0
         self.end_pos = len(self.table)
 
     def _read_byte(self):
@@ -178,8 +179,9 @@ class LineTableReader311(LineTableReader):
     def read(self):
         b = self._read_byte()
         code = (b >> 3) & 15
+        code_units = (b & 7) + 1
         self.start = self.end
-        self.end = self.start + (b & 7) + 1
+        self.end = self.start + code_units * 2
         if code == PyCodeLocation.INFO_NONE:
             endline = -1
             col = -1
@@ -216,9 +218,14 @@ class LineTableReader311(LineTableReader):
             # Happens for the final RETURN_VALUE in generator expressions
             endline = startcol = endcol = -1
         else:
-            endline, startcol, endcol = self.read()
+            endline = startcol = endcol = -1
+            # Method calls seem to generate extra linetable entries so we cannot
+            # just read one linetable entry per opcode.
+            while self.end <= i and self.pos < self.end_pos:
+                endline, startcol, endcol = self.read()
         return Entry(
             offset=i,
+            end_offset=self.end,
             line=self.line,
             endline=endline,
             startcol=startcol,
@@ -230,7 +237,7 @@ class LineTableReader311(LineTableReader):
         i = 0
         while self.pos < self.end_pos:
             ret.append(self.get(i))
-            i = self.start * 2
+            i = self.end
         return ret
 
 

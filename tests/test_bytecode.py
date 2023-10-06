@@ -83,6 +83,19 @@ class TestBytecode(unittest.TestCase):
         retval = genexpr.opcodes[-1]
         self.assertEqual((retval.name, retval.line), ("RETURN_VALUE", 2))
 
+    def test_method_calls(self):
+        # Check that we assign line numbers correctly in 3.11
+        # (regression test for https://github.com/google/pycnite/issues/15)
+        path = base.test_pyc("method_calls", (3, 11))
+        code = pyc.load_file(path)
+        d = bytecode.dis_all(code)
+        lines = [x.line for x in d.opcodes]
+        chunks = [(0, 1), (1, 3), (2, 6), (3, 5), (4, 6), (5, 10)]
+        expected = []
+        for l, n in chunks:
+            expected.extend([l] * n)
+        self.assertEqual(lines, expected)
+
     def test_exception_table(self):
         def run(version):
             path = base.test_pyc("exception", version)
