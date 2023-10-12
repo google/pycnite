@@ -193,7 +193,7 @@ class LineTableReader311(LineTableReader):
             endcol = self._read_varint() - 1
         elif code == PyCodeLocation.INFO_NO_COLUMNS:
             self.line += self._read_signed_varint()
-            endline = self.line + self._read_varint()
+            endline = self.line
             col = -1
             endcol = -1
         elif code in (
