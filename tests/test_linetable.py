@@ -26,9 +26,11 @@ from pycnite import types
 class TestLineTable(unittest.TestCase):
     """Test linetable parsing."""
 
-    def _get_linetable(self, testfile, version):
+    def _get_linetable(self, testfile, version, fn=None):
         path = base.test_pyc(testfile, version)
         code = pyc.load_file(path)
+        if fn is not None:
+            code = code.co_consts[fn]
         lt = linetable.linetable_reader(code)
         return lt.read_all()
 
@@ -54,6 +56,14 @@ class TestLineTable(unittest.TestCase):
             else:
                 expected = [1, 2, 3, 4, 5, 6]
             self.assertEqual(lines, expected)
+
+    def test_generator_311(self):
+        # Check that we handle NO_COLUMN_INFO correctly in 3.11
+        # (regression test for https://github.com/google/pycnite/issues/18)
+        entries = self._get_linetable("generator", (3, 11), fn=0)
+        self.assertEqual(len(entries), 11)
+        for e in entries:
+            self.assertEqual(e.line, e.endline)
 
 
 class TestExceptionTable(unittest.TestCase):
