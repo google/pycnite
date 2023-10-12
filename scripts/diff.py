@@ -9,6 +9,9 @@ import sys
 
 from typing import List
 
+# Make sure we import from the local copy of pycnite
+sys.path = [os.path.dirname(os.path.dirname(__file__))] + sys.path
+
 from pycnite import bytecode
 from pycnite import linetable
 from pycnite import pyc
