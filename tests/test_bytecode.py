@@ -67,6 +67,15 @@ class TestBytecode(unittest.TestCase):
         for version in base.VERSIONS:
             run(version)
 
+    def test_line_col(self):
+        path = base.test_pyc("trivial", (3, 11))
+        code = pyc.load_file(path)
+        opcode = bytecode.dis(code)[0]
+        self.assertIsNotNone(opcode.line)
+        self.assertIsNotNone(opcode.endline)
+        self.assertIsNotNone(opcode.col)
+        self.assertIsNotNone(opcode.endcol)
+
     def test_extended_arg(self):
         code = bytearray([144, 10, 144, 20, 100, 1])
         ops = list(bytecode.wordcode_reader(code))

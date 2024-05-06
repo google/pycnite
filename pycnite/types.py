@@ -68,6 +68,9 @@ class Opcode:
 
     offset: int
     line: int
+    endline: int
+    col: int
+    endcol: int
     op: int
     name: str
     arg: Optional[int]
