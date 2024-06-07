@@ -38,6 +38,8 @@ class TestMapping(unittest.TestCase):
         self.run_test((3, 11), 6, None)
         self.run_test((3, 11), 9, "NOP")
         self.run_test((3, 11), 75, "RETURN_GENERATOR")
+        self.run_test((3, 12), 121, "RETURN_CONST")
+        self.run_test((3, 12), 150, "YIELD_VALUE")
 
 
 if __name__ == "__main__":

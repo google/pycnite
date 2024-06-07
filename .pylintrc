@@ -5,7 +5,7 @@
 # Its canonical open-source location is:
 #   https://google.github.io/styleguide/pylintrc
 
-[MASTER]
+[main]
 
 # Files or directories to be skipped. They should be base names, not paths.
 ignore=third_party
@@ -27,6 +27,9 @@ jobs=4
 # Allow loading of arbitrary C extensions. Extensions are imported into the
 # active Python interpreter and may run arbitrary code.
 unsafe-load-any-extension=no
+
+# pycnite should be able to run under Python 3.8.
+py-version=3.8
 
 
 [MESSAGES CONTROL]

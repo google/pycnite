@@ -4,7 +4,7 @@
 
 # Install python versions if required
 
-versions=('3.8' '3.9' '3.10' '3.11')
+versions=('3.8' '3.9' '3.10' '3.11' '3.12')
 
 for version in "${versions[@]}"
 do
@@ -15,8 +15,8 @@ done
 for version in "${versions[@]}"
 do
   pyenv local "$version"
-  python --version
-  python -m compileall src
+  pyenv exec python --version
+  pyenv exec python -m compileall src
   suffix="cpython-$(echo $version | tr -d '.').pyc"
   mv src/__pycache__/*.$suffix $version
 done

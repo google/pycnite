@@ -271,6 +271,46 @@ PYTHON_3_11_MAPPING: OpMap = _overlay_mapping(
     },
 )
 
+PYTHON_3_12_MAPPING: OpMap = _overlay_mapping(
+    PYTHON_3_11_MAPPING,
+    {
+        3: "INTERPRETER_EXIT",
+        4: "END_FOR",
+        5: "END_SEND",
+        10: None,  # was UNARY_POSITIVE in 3.11
+        17: "RESERVED",
+        26: "BINARY_SLICE",
+        27: "STORE_SLICE",
+        55: "CLEANUP_THROW",
+        70: None,  # was PRINT_EXPR in 3.11
+        82: None,  # was LIST_TO_TUPLE in 3.11
+        84: None,  # was IMPORT_STAR in 3.11
+        86: None,  # was YIELD_VALUE in 3.11
+        87: "LOAD_LOCALS",  # was ASYNC_GEN_WRAP in 3.11
+        88: None,  # was PREP_RERAISE_STAR in 3.11
+        111: None,  # was JUMP_IF_FALSE_OR_POP in 3.11
+        112: None,  # was JUMP_IF_TRUE_OR_POP in 3.11
+        114: "POP_JUMP_IF_FALSE",  # was POP_JUMP_FORWARD_IF_FALSE in 3.11
+        115: "POP_JUMP_IF_TRUE",  # was POP_JUMP_FORWARD_IF_TRUE in 3.11
+        121: "RETURN_CONST",
+        127: "LOAD_FAST_CHECK",
+        128: "POP_JUMP_IF_NOT_NONE",  # was POP_JUMP_FORWARD_IF_NOT_NONE in 3.11
+        129: "POP_JUMP_IF_NONE",  # was POP_JUMP_FORWARD_IF_NONE in 3.11
+        141: "LOAD_SUPER_ATTR",
+        143: "LOAD_FAST_AND_CLEAR",
+        148: None,  # was LOAD_CLASSDEREF in 3.11
+        150: "YIELD_VALUE",
+        160: None,  # was LOAD_METHOD in 3.11
+        166: None,  # was PRECALL in 3.11
+        173: "CALL_INTRINSIC_1",  # was POP_JUMP_BACKWARD_IF_NOT_NONE in 3.11
+        174: "CALL_INTRINSIC_2",  # was POP_JUMP_BACKWARD_IF_NONE in 3.11
+        175: (
+            "LOAD_FROM_DICT_OR_GLOBALS"
+        ),  # was POP_JUMP_BACKWARD_IF_FALSE in 3.11
+        176: "LOAD_FROM_DICT_OR_DEREF",  # was POP_JUMP_BACKWARD_IF_TRUE in 3.11
+    },
+)
+
 
 def get_mapping(version: Tuple[int, int]) -> OpMap:
     return {
@@ -278,6 +318,7 @@ def get_mapping(version: Tuple[int, int]) -> OpMap:
         (3, 9): PYTHON_3_9_MAPPING,
         (3, 10): PYTHON_3_10_MAPPING,
         (3, 11): PYTHON_3_11_MAPPING,
+        (3, 12): PYTHON_3_12_MAPPING,
     }[version]
 
 
@@ -351,16 +392,31 @@ PYTHON_3_8_ARG_TYPES: OpArgs = {
     "POP_JUMP_BACKWARD_IF_TRUE": JREL,
 }
 
-
 PYTHON_3_11_ARG_TYPES: OpArgs = {
     **PYTHON_3_8_ARG_TYPES,
     "JUMP_IF_FALSE_OR_POP": JREL,
     "JUMP_IF_TRUE_OR_POP": JREL,
 }
 
+PYTHON_3_12_ARG_TYPES: OpArgs = {
+    **PYTHON_3_11_ARG_TYPES,
+    "POP_JUMP_IF_FALSE": JREL,
+    "POP_JUMP_IF_TRUE": JREL,
+    "RETURN_CONST": CONST,
+    "LOAD_FAST_CHECK": LOCAL,
+    "POP_JUMP_IF_NOT_NONE": JREL,
+    "POP_JUMP_IF_NONE": JREL,
+    "LOAD_SUPER_ATTR": NAME,
+    "LOAD_FAST_AND_CLEAR": LOCAL,
+    "LOAD_FROM_DICT_OR_GLOBALS": NAME,
+    "LOAD_FROM_DICT_OR_DEREF": FREE,
+}
+
 
 def arg_type(name: str, version: Tuple[int, int]) -> Optional[int]:
-    if version >= (3, 11):
+    if version >= (3, 12):
+        argmap = PYTHON_3_12_ARG_TYPES
+    elif version >= (3, 11):
         argmap = PYTHON_3_11_ARG_TYPES
     else:
         argmap = PYTHON_3_8_ARG_TYPES

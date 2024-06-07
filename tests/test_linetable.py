@@ -70,47 +70,54 @@ class TestExceptionTable(unittest.TestCase):
     """Test exceptiontable parsing."""
 
     def test_basic(self):
-        # Exception table is new in 3.11
-        path = base.test_pyc("exception", (3, 11))
-        code = pyc.load_file(path)
-        et = linetable.ExceptionTableReader(code)
-        actual = et.read_all()
-        entry = types.ExceptionTableEntry
-        # Verified using godbolt
-        expected = [
-            entry(start=4, end=22, target=26, depth=0, lasti=False),
-            entry(start=24, end=24, target=66, depth=0, lasti=False),
-            entry(start=26, end=34, target=58, depth=1, lasti=True),
-            entry(start=36, end=38, target=66, depth=0, lasti=False),
-            entry(start=40, end=46, target=58, depth=1, lasti=True),
-            entry(start=48, end=50, target=66, depth=0, lasti=False),
-            entry(start=52, end=52, target=58, depth=1, lasti=True),
-            entry(start=54, end=62, target=66, depth=0, lasti=False),
-            entry(start=66, end=68, target=70, depth=1, lasti=True),
-            entry(start=78, end=86, target=92, depth=0, lasti=False),
-            entry(start=92, end=94, target=102, depth=1, lasti=True),
-        ]
-        self.assertEqual(actual, expected)
+        for version in base.VERSIONS:
+            # Exception table is new in 3.11
+            if version < (3, 11):
+                continue
+            path = base.test_pyc("exception", version)
+            code = pyc.load_file(path)
+            et = linetable.ExceptionTableReader(code)
+            actual = et.read_all()
+            entry = types.ExceptionTableEntry
+            # Verified using godbolt
+            expected = [
+                entry(start=4, end=22, target=26, depth=0, lasti=False),
+                entry(start=24, end=24, target=66, depth=0, lasti=False),
+                entry(start=26, end=34, target=58, depth=1, lasti=True),
+                entry(start=36, end=38, target=66, depth=0, lasti=False),
+                entry(start=40, end=46, target=58, depth=1, lasti=True),
+                entry(start=48, end=50, target=66, depth=0, lasti=False),
+                entry(start=52, end=52, target=58, depth=1, lasti=True),
+                entry(start=54, end=62, target=66, depth=0, lasti=False),
+                entry(start=66, end=68, target=70, depth=1, lasti=True),
+                entry(start=78, end=86, target=92, depth=0, lasti=False),
+                entry(start=92, end=94, target=102, depth=1, lasti=True),
+            ]
+            self.assertEqual(actual, expected)
 
     def test_complex(self):
-        path = base.test_pyc("complex_exception", (3, 11))
-        code = pyc.load_file(path)
-        et = linetable.ExceptionTableReader(code.co_consts[0])
-        actual = et.read_all()
-        entry = types.ExceptionTableEntry
-        # Verified using godbolt
-        expected = [
-            entry(start=8, end=20, target=162, depth=0, lasti=False),
-            entry(start=22, end=94, target=96, depth=1, lasti=True),
-            entry(start=96, end=102, target=104, depth=3, lasti=True),
-            entry(start=104, end=108, target=162, depth=0, lasti=False),
-            entry(start=110, end=110, target=104, depth=3, lasti=True),
-            entry(start=112, end=158, target=162, depth=0, lasti=False),
-            entry(start=162, end=180, target=286, depth=1, lasti=True),
-            entry(start=182, end=264, target=276, depth=1, lasti=True),
-            entry(start=276, end=284, target=286, depth=1, lasti=True),
-        ]
-        self.assertEqual(actual, expected)
+        for version in base.VERSIONS:
+            # Exception table is new in 3.11
+            if version < (3, 11):
+                continue
+            path = base.test_pyc("complex_exception", version)
+            code = pyc.load_file(path)
+            et = linetable.ExceptionTableReader(code.co_consts[0])
+            actual = et.read_all()
+            entry = types.ExceptionTableEntry
+            # Verified using godbolt
+            expected = [
+                entry(start=8, end=20, target=162, depth=0, lasti=False),
+                entry(start=22, end=94, target=96, depth=1, lasti=True),
+                entry(start=96, end=102, target=104, depth=3, lasti=True),
+                entry(start=104, end=108, target=162, depth=0, lasti=False),
+                entry(start=110, end=110, target=104, depth=3, lasti=True),
+                entry(start=112, end=158, target=162, depth=0, lasti=False),
+                entry(start=162, end=180, target=286, depth=1, lasti=True),
+                entry(start=182, end=264, target=276, depth=1, lasti=True),
+                entry(start=276, end=284, target=286, depth=1, lasti=True),
+            ]
+            self.assertEqual(actual, expected)
 
 
 if __name__ == "__main__":
