@@ -20,24 +20,26 @@ from pycnite import mapping
 
 
 class TestMapping(unittest.TestCase):
-    """Test opcode to name mapping."""
+  """Test opcode to name mapping."""
 
-    def run_test(self, version, op, expected):
-        opmap = mapping.get_mapping(version)
-        self.assertEqual(opmap.get(op), expected)
+  def run_test(self, version, op, expected):
+    opmap = mapping.get_mapping(version)
+    self.assertEqual(opmap.get(op), expected)
 
-    def test_versions(self):
-        """Spot checks for a few opcodes."""
-        self.run_test((3, 8), 9, "NOP")
-        self.run_test((3, 9), 9, "NOP")
-        self.run_test((3, 9), 53, None)
-        self.run_test((3, 9), 117, "IS_OP")
-        self.run_test((3, 10), 99, "ROT_N")
-        self.run_test((3, 10), 48, None)
-        self.run_test((3, 11), 0, "CACHE")
-        self.run_test((3, 11), 6, None)
-        self.run_test((3, 11), 9, "NOP")
-        self.run_test((3, 11), 75, "RETURN_GENERATOR")
+  def test_versions(self):
+    """Spot checks for a few opcodes."""
+    self.run_test((3, 8), 9, "NOP")
+    self.run_test((3, 9), 9, "NOP")
+    self.run_test((3, 9), 53, None)
+    self.run_test((3, 9), 117, "IS_OP")
+    self.run_test((3, 10), 99, "ROT_N")
+    self.run_test((3, 10), 48, None)
+    self.run_test((3, 11), 0, "CACHE")
+    self.run_test((3, 11), 6, None)
+    self.run_test((3, 11), 9, "NOP")
+    self.run_test((3, 11), 75, "RETURN_GENERATOR")
+    self.run_test((3, 12), 121, "RETURN_CONST")
+    self.run_test((3, 12), 150, "YIELD_VALUE")
 
 
 if __name__ == "__main__":

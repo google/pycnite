@@ -52,7 +52,7 @@ class TestBytecode(unittest.TestCase):
             path = base.test_pyc("trivial", version)
             code = pyc.load_file(path)
             opcodes = [(x.name, x.argval) for x in bytecode.dis(code)]
-            if version == (3, 11):
+            if version >= (3, 11):
                 opcodes = opcodes[1:5]
             else:
                 opcodes = opcodes[0:4]
@@ -110,7 +110,7 @@ class TestBytecode(unittest.TestCase):
             path = base.test_pyc("exception", version)
             code = pyc.load_file(path)
             dis = bytecode.dis_all(code)
-            if version == (3, 11):
+            if version >= (3, 11):
                 self.assertTrue(dis.exception_table)
             else:
                 self.assertFalse(dis.exception_table)
