@@ -42,6 +42,11 @@ class TestBytecode(unittest.TestCase):
             "LOAD_NAME",
             "BINARY_OP",
             "STORE_NAME",
+            "LOAD_NAME",
+            "LOAD_NAME",
+            "LOAD_ATTR",
+            "COMPARE_OP",
+            "STORE_NAME",
             "LOAD_CONST",
             "RETURN_VALUE",
         ]
@@ -52,15 +57,20 @@ class TestBytecode(unittest.TestCase):
             path = base.test_pyc("trivial", version)
             code = pyc.load_file(path)
             opcodes = [(x.name, x.argval) for x in bytecode.dis(code)]
+            # 3.11+ bytecode starts with a RESUME opcode. Skip that.
             if version >= (3, 11):
-                opcodes = opcodes[1:5]
-            else:
-                opcodes = opcodes[0:4]
+                opcodes = opcodes[1:]
+            # Grab some opcodes where we care about the argval:
+            # - 0:4 are opcodes for `x = 1\ny = 2`
+            # - 14:16 are the last opcodes for `b = x < y.z`
+            opcodes = opcodes[0:4] + opcodes[14:16]
             expected = [
                 ("LOAD_CONST", 1),
                 ("STORE_NAME", "x"),
                 ("LOAD_CONST", 2),
                 ("STORE_NAME", "y"),
+                ("LOAD_ATTR", "z"),
+                ("COMPARE_OP", 0),
             ]
             self.assertEqual(opcodes, expected)
 

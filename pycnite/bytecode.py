@@ -93,6 +93,11 @@ class Disassembler:
         return vals[arg]
 
     def _decode_arg(self, name: str, arg_type: int, arg: int, end_pos: int):
+        if self.python_version >= (3, 12):
+            if name == "COMPARE_OP":
+                return arg >> 4
+            if name == "LOAD_ATTR":
+                return arg >> 1
         if self.python_version >= (3, 11):
             if name == "LOAD_GLOBAL":
                 return arg // 2
